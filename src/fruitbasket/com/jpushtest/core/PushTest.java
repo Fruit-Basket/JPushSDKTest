@@ -38,36 +38,6 @@ public class PushTest {
 	
 	private static final PushTest instance=new PushTest();
 	
-	protected static final Logger LOG = LoggerFactory.getLogger(PushTest.class);
-		
-    public static final String TITLE = "Title: from JpushSDKTest";//推送消息的标题
-	public static final String ALERT = "Content: Hello world!";//推送消息的内容
-	
-	public static final String MSG_CONTENT = "Content: I am Study Z!";//自定义消息内容
-	
-	private static JPushClient jpushClient;
-	private static CIDResult cidResult;
-	
-	static {
-		ClientConfig config = ClientConfig.getInstance();
-        config.setPushHostName(Condition.PUSH_HOST);
-		jpushClient = new JPushClient(Condition.MASTER_SECRET, Condition.APP_KEY, null, config);
-		
-		try {
-			//获取CID列表
-			cidResult=jpushClient.getCidList(
-					10, //Cid数量
-					"push"//类型
-			);
-			
-		} catch (APIConnectionException e) {
-			e.printStackTrace();
-		} catch (APIRequestException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
 	private PushTest() {}
 	
 	public PushTest getInstance() {
@@ -76,233 +46,375 @@ public class PushTest {
 	
 	/**
 	 * 推送App通知到所有设备
+	 * @param masterSecret
+	 * @param appKey
+	 * @param alert 通知内容
 	 */
-	public static void sendPushToAll(
-			String masterSecret,
-			String appKey,
-			String alert//通知内容
-			) {
+	public static void sendPush0(String masterSecret,String appKey,String alert) {
 		
 		ClientConfig config = ClientConfig.getInstance();
         config.setPushHostName("https://api.jpush.cn");
         
         JPushClient jpushClient = new JPushClient(
-				masterSecret,//应用的MasterSecret，可以在极光后台中看到
-				appKey,//应用的AppKey，可以在极光后台中看到
+				masterSecret,
+				appKey,
 				null, 
 				config
 		);
-		
+	
         //构建一个推送
 		PushPayload payload =PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
+				.setPlatform(Platform.all())//指定所有平台，包括Android和iOS
+				.setAudience(Audience.all())//指定全体客户端
 				.setNotification(Notification.alert(alert))
 				.build();
   
         try {
         	//将推送发送出去
             PushResult result = jpushClient.sendPush(payload);
-
-            LOG.info("返回结果：");
-            LOG.info("Message ID："+result.msg_id);
-            LOG.info("返回码："+result.getResponseCode());
-            LOG.info("状态码："+result.statusCode);
-            LOG.info("原始内容："+result.getOriginalContent());
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
             
         } catch (APIConnectionException e) {
-            LOG.error("APIConnectionException");
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("APIRequestException");
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
-            LOG.info("Msg ID: " + e.getMsgId());
+            e.printStackTrace();
         }
 	}
 	
 	/**
-	 * 推送指定消息
+	 * 指定推送目标：Registration ID
+	 * @param masterSecret
+	 * @param appKey
+	 * @param RegistrationIds
 	 */
-	public static void sendPush() {
+	public static void sendPush1(String masterSecret,String appKey,String... RegistrationIds) {
 		
-		//使用不同的PushPayload，以实现不同的推送
-        PushPayload payload =
-        		buildPushObject_16();
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+		
+        PushPayload payload=PushPayload.newBuilder()
+        		.setPlatform(Platform.all())
+        		.setAudience(Audience.registrationId(RegistrationIds))
+        		.setNotification(Notification.alert("by RegistrationIds"))
+        		.build();
   
         try {
+        	//将推送发送出去
             PushResult result = jpushClient.sendPush(payload);
             jpushClient.close();
-
-            LOG.info("返回结果：");
-            LOG.info("Message ID："+result.msg_id);
-            LOG.info("返回码："+result.getResponseCode());
-            LOG.info("状态码："+result.statusCode);
-            LOG.info("原始内容："+result.getOriginalContent());
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
             
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
-            LOG.info("Msg ID: " + e.getMsgId());
+            e.printStackTrace();
         }
-    }
-	
-	/**
-	 * 面向所有平台、所有设备，内容为ALERT
-	 * @return 
-	 */
-	private static PushPayload buildPushObject_0() {
-        return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				.setNotification(Notification.alert(ALERT))
-				.build();
-    }
-	
-	/**
-	 * 目标：Registration ID
-	 * @return
-	 */
-	private static PushPayload buildPushObject_1() {
-		String[] regIds={
-				Condition.REGISTRATION_ID_1,
-				Condition.REGISTRATION_ID_2
-		};
-		
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(
-						Audience.registrationId(
-								regIds
-								//JPushCondition.REGISTRATION_ID_1,//指定registration id
-								//JPushCondition.REGISTRATION_ID_2
-								//可以在此处传入更多的RegistrationID
-								)
-				)
-				.setNotification(Notification.alert(ALERT))
-				.build();
 	}
 	
 	/**
-	 * 目标：别名
-	 * @return
+	 * 指定推送目标：别名
+	 * @param masterSecret
+	 * @param appKey
+	 * @param alias 别名
 	 */
-	private static PushPayload buildPushObject_2() {
+	public static void sendPush2(String masterSecret,String appKey,String... alias) {
 		
-		String[] alias= {
-				Condition.ALIAS_1,
-				};
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
 		
-        return PushPayload.newBuilder()
-                .setPlatform(Platform.all())
-                .setAudience(Audience.alias(alias))//别名
-                .setNotification(Notification.alert(ALERT))
-                .build();
-    }
+        PushPayload payload=PushPayload.newBuilder()
+        		.setPlatform(Platform.all())
+        		.setAudience(Audience.alias(alias))
+        		.setNotification(Notification.alert("by alias"))
+        		.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
 	
 	/**
-	 * 目标：标签
-	 * @return
+	 * 指定推送目标：标签
+	 * @param masterSecret
+	 * @param appKey
+	 * @param tags 标签
 	 */
-	private static PushPayload buildPushObject_3() {
-        return PushPayload.newBuilder()
-                .setPlatform(Platform.android())//面向Android平台
-                .setAudience(
-                		Audience.tag(
-                				Condition.TAG_1,
-                				Condition.TAG_2)
-                		)//标签
-                .setNotification(Notification.alert(ALERT))
-                .build();
-    }
+	public static void sendPush3(String masterSecret,String appKey,String... tags) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+		
+        PushPayload payload=PushPayload.newBuilder()
+        		.setPlatform(Platform.all())
+        		.setAudience(Audience.tag(tags))
+        		.setNotification(Notification.alert("by Tags"))
+        		.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
 	
 	/**
-	 *  Android
-	 * 指定推送样式编号、增加Extra
-	 * @return
+	 * 指定推送目标：同时使用别名和标签
+	 * @param masterSecret
+	 * @param appKey
+	 * @param alias_1 别名1
+	 * @param alias_2 别名2
+	 * @param tags 标签
 	 */
-	private static PushPayload buildPushObject_4() {
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				
+	public static void sendPush4(String masterSecret,String appKey,String alias_1,String alias_2,String... tags) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+		
+        PushPayload payload=PushPayload.newBuilder()
+        		.setPlatform(Platform.all())
+        		.setAudience(
+        				Audience.newBuilder()
+        				.addAudienceTarget(AudienceTarget.alias(alias_1, alias_2))//指定目标为alias_1和alias_2的并集
+						.addAudienceTarget(AudienceTarget.tag(tags))//指定目标为tags的并集
+						.build())
+        		.setNotification(Notification.alert("by RegistrationIds"))
+        		.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * 推送平台：Android
+	 * @param masterSecret 应用的MasterSecret，可以在极光后台中看到
+	 * @param appKey 应用的AppKey，可以在极光控制中查询到
+	 * @param title 通知标题
+	 * @param alert 通知内容
+	 */
+	public static void sendPush5(String masterSecret,String appKey,String title,String alert) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+	
+        //构建一个推送
+		PushPayload payload =PushPayload.newBuilder()
+				.setPlatform(Platform.android())//指定Android平台
+				.setAudience(Audience.all())//指定全体客户端
 				.setNotification(Notification.newBuilder()
-		                    .setAlert(ALERT)
-		                    .addPlatformNotification(
-		                    		AndroidNotification.newBuilder()//Android 
-		                            .setTitle(TITLE)//
-		                            
-		                            .setBuilderId(3)//指定样式编号
-		                            .addExtra("name", "StudyZ").build()//推送通知中添加Extra字段
-		                    )
-		                    .build())
-		
+	                    .setAlert(alert)
+	                    //新建Android通知
+	                    .addPlatformNotification(
+	                    		AndroidNotification.newBuilder()//Android 
+	                            .setTitle(title)
+	                            .addExtra("name", "StudyZ").build()//推送通知中添加Extra字段
+	                    )
+	                    .build())
+				
 				.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
 	}
 	
+	/**
+	 * 指定推送内容：Android与iOS
+	 * @param masterSecret
+	 * @param appKey
+	 * @param title
+	 * @param alert
+	 */
+	public static void sendPush6(String masterSecret,String appKey,String title,String alert) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+		
+        PushPayload payload=PushPayload.newBuilder()
+        		.setPlatform(Platform.all())
+        		.setAudience(Audience.all())
+        		.setNotification(Notification.newBuilder()
+	                    .setAlert(alert)
+	                    
+	                    .addPlatformNotification(
+	                    		AndroidNotification.newBuilder()
+	                            .setTitle(title)
+	                            .build()
+	                            )
+	                    
+	                    .addPlatformNotification(
+	                    		IosNotification.newBuilder()
+	                    		.setAlert(alert)
+	                    		.build())
+	                    .build())
+        		.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
 	/**
 	 * 自定义消息
-	 * @return
+	 * @param masterSecret
+	 * @param appKey
+	 * @param content 自定义消息内容
 	 */
-	private static PushPayload buildPushObject_5() {
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				//自定义消息
+	public static void sendPush7(String masterSecret,String appKey,String content) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+		
+        PushPayload payload=PushPayload.newBuilder()
+        		.setPlatform(Platform.all())
+        		.setAudience(Audience.all())
+        		//自定义消息
 				.setMessage(
 						Message.newBuilder()
-						.setMsgContent(MSG_CONTENT)//消息内容
+						.setMsgContent(content)//消息内容
 						.addExtra("extra", "JPush message")
 						.build()
 				)
-				.build();
-	}
-	
-	/**
-	 * 目标：标签、别名
-	 * 自定义消息
-	 * @return
-	 */
-	private static PushPayload buildPushObject_6() {
-		return PushPayload.newBuilder()
-					.setPlatform(Platform.android_ios())//面向iOS平台
-					
-					.setAudience(
-						Audience.newBuilder()
-							.addAudienceTarget(AudienceTarget.tag(Condition.TAG_1, Condition.TAG_2))//指定目标TAG为TAG_1和TAG_2的并集
-							.addAudienceTarget(AudienceTarget.alias(Condition.ALIAS_1, Condition.ALIAS_2))//指定目标ALIAS为ALIAS_1和ALIAS_2的并集
-							.build()
-						)
-					
-					//自定义消息
-					.setMessage(
-						Message.newBuilder()
-							.setMsgContent(MSG_CONTENT)
-							.addExtra("extra", "JPush message")
-							.build()
-						)
-					.build();
-	}
-	
-	/**
-	 * JSON
-	 * @return
-	 */
-	private static PushPayload buildPushObject_7() {
-		Gson gson = new GsonBuilder()
-                .registerTypeAdapter(PlatformNotification.class, new InterfaceAdapter<PlatformNotification>())
-                .create();
-		
-		//根据JSON构建
-        String payloadString="";///无法构建正确的Json
-        
-        PushPayload payload = gson.fromJson(payloadString, PushPayload.class);
-        return payload;
-		
+        		.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
 	}
 	
 	/**
@@ -310,305 +422,220 @@ public class PushTest {
 	 * 
 	 * 说明：
 	 * Android客户端会展示此推送
-	 * @return
+	 * 
+	 * @param masterSecret
+	 * @param appKey
+	 * @param alert 通知内容
+	 * @param content 自定义消息内容
 	 */
-	private static PushPayload buildPushObject_8() {
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				
-				//新建推送通知
+	public static void sendPush8(String masterSecret,String appKey,String alert,String content) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+		
+        PushPayload payload=PushPayload.newBuilder()
+        		.setPlatform(Platform.all())
+        		.setAudience(Audience.all())
+        		//新建推送通知
 				.setNotification(Notification.newBuilder()
-		                    .setAlert(ALERT)
-		                    .addPlatformNotification(
-		                    		AndroidNotification.newBuilder()
-		                            .setTitle(TITLE)
-		                            .build())
+		                    .setAlert(alert)
 		                    .build())
 				
 				//自定义消息
 				.setMessage(
 						Message.newBuilder()
-						.setMsgContent(MSG_CONTENT)
+						.setMsgContent(content)
 						.build()
 				)
-				.build();
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	private static PushPayload buildPushObject_9() {
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				
-				.setNotification(Notification.newBuilder()//新建推送通知
-		                    .setAlert(ALERT)
-		                    .addPlatformNotification(
-		                    		AndroidNotification.newBuilder()
-		                            .setTitle(TITLE)
-		                            .build())
-		                    .build())
-				
-				.setOptions(Options.newBuilder()
-						.setTimeToLive(120)
-						.build())
-				.build();
-	}
-	
-	/**
-	 * 给Android和iOS同时发送消息
-	 */
-	public static PushPayload buildPushObject_11() {
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				
-				//新建推送通知
-				.setNotification(Notification.newBuilder()
-		                    .setAlert(ALERT)
-		                    
-		                    .addPlatformNotification(
-		                    		AndroidNotification.newBuilder()
-		                            .setTitle(TITLE)
-		                            .addExtra("name", "StudyZ")//推送通知中添加Extra字段
-		                            .build()
-		                            )
-		                    
-		                    .addPlatformNotification(
-		                    		IosNotification.newBuilder()
-		                    		.setAlert(ALERT)
-		                    		.build())
-		                    .build())
-
-				.build();
-	}
-	
-	/**
-	 * 使用CID
-	 * @return
-	 */
-	public static PushPayload buildPushObject_12() {
-		
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				.setNotification(Notification.alert(ALERT))
-				.setCid(cidResult.cidlist.get(0))
-				.build();
-	}
-	
-	/**
-	 * 使用用户分群推送
-	 * @return
-	 */
-	public static PushPayload buildPushObject_13() {
-		
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(
-						Audience.segment(Condition.GROUP_1_ID)
-						)
-				.setNotification(Notification.alert(ALERT))
-				.build();
-	}
-	
-	/**
-	 * 在华为推送中跳转到指定的Activity                 
- 	 * @return
-	 */
-	private static PushPayload buildPushObject_14() {
-		//指定点击华为推送打开的Activity
-		final String activityUri="com.example.jiguang.jpusttest.HuaweiActivity";
-		
-		Notification notification=Notification
-				.newBuilder()
-				.setAlert(ALERT)
-                .addPlatformNotification(
-                		AndroidNotification.newBuilder()
-                        .setTitle(TITLE)
-                        .setUriActivity(activityUri)
-                        .build())
-                .build();   
-		
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.android())
-				.setAudience(Audience.all())
-				.setNotification(notification)
-				.build();
-	}
-	
-	/**
-	 * 在FCM中跳转到指定的Activity 
-	 */
-	private static PushPayload buildPushObject_15() {
-		//指定点击FCM通知时打开的Activity
-		final String uriAction="com.example.jiguang.jpusttest.FCMActivity";
-		
-		Notification notification=Notification
-				.newBuilder()
-				.setAlert(ALERT)
-                .addPlatformNotification(
-                		AndroidNotification.newBuilder()
-                        .setTitle(TITLE)
-                        .setUriAction(uriAction)
-                        .build())
-                .build();   
-		
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.android())
-				.setAudience(Audience.all())
-				.setNotification(notification)
-				.build();
-		
-	}
-	
-	/**
-	 * 推送到APNs生产环境
-	 * @return
-	 */
-	private static PushPayload buildPushObject_16() {
-		return PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				.setNotification(Notification.alert(ALERT))
-				.setOptions(Options.newBuilder()
-						.setApnsProduction(false)
-						.build())
-				.build();
-	}
-	
-	/**
-	 * 使用短信补充
-	 */
-	public static void testSendSms() {
-		final long  tempID=152316;//短信模板id
-		
-		try {
-			
-			SMS sms=SMS.newBuilder()
-					.setTempID(tempID)
-					.setDelayTime(3)
-					//.addPara(key, value)//添加变量，有的短信中需要用到变量
-					.build();
-			
-			PushResult result = jpushClient.sendAndroidNotificationWithRegistrationID(
-					"短信通知对应的推送的标题",
-					"短信通知对应的推送的内容", 
-					sms,
-					null, 
-					Condition.REGISTRATION_ID_2);
-			
-			LOG.info("调用结果：" + result);
-		
-		} catch (APIConnectionException e) {
-			LOG.error("Connection error. Should retry later. ", e);
-		} catch (APIRequestException e) {
-			LOG.error("Error response from JPush server. Should review and fix it. ", e);
-			LOG.info("HTTP Status: " + e.getStatus());
-			LOG.info("Error Code: " + e.getErrorCode());
-			LOG.info("Error Message: " + e.getErrorMessage());
-		}
-	}
-	
-	/**
-	 * 使用应用分组推送推送
-	 */
-	public static void groupPush(
-			String groupMastersecret,
-			String groupAppKey,
-			String alert//通知内容
-			) {
-		
-		GroupPushClient groupPushClient=new GroupPushClient(
-				groupMastersecret,
-				groupAppKey
-				);
-		
-		PushPayload pushPayload=
-				PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				.setNotification(Notification.alert(alert))
-				.build();
-		
-		try {
-			groupPushClient.sendGroupPush(pushPayload);
-		} catch (APIConnectionException e) {
-			e.printStackTrace();
-		} catch (APIRequestException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * 设置APNs环境
-	 * @param masterSecret
-	 * @param appKey
-	 */
-	public static void test1(final String masterSecret,final String appKey) {
-		ClientConfig config = ClientConfig.getInstance();
-	    config.setPushHostName("https://api.jpush.cn");
-		JPushClient jpushClient = new JPushClient(masterSecret,appKey, null, config);
-		
-		PushPayload load=PushPayload.newBuilder()
-				.setPlatform(Platform.all())
-				.setAudience(Audience.all())
-				.setNotification(Notification.alert(ALERT))//通知内容字符串
-				.setOptions(Options.newBuilder()
-						.setApnsProduction(false)//false:测试环境；true：开发环境
-						.build())
-				.build();
-		
-		try {
-			jpushClient.sendPush(load);
-		} catch (APIConnectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (APIRequestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * 利用别名指定推送目标
-	 * @param masterSecret
-	 * @param appKey
-	 * @param alert 通知内容
-	 * @param alias 别名，可以传入单个别名或别名数组
-	 */
-	public static void sendToAlias(final String masterSecret,final String appKey,final String alert,final String ... alias) {
-		ClientConfig config = ClientConfig.getInstance();
-	    config.setPushHostName("https://api.jpush.cn");
-		JPushClient jpushClient = new JPushClient(Condition.MASTER_SECRET, Condition.APP_KEY, null, config);
-	
-        PushPayload payload=PushPayload.newBuilder()
-        	.setPlatform(Platform.all())
-            .setAudience(Audience.alias(alias))//可以传入单个别名或别名数组
-            .setNotification(Notification.alert(alert))
-            .build();
-        
+        		.build();
+  
         try {
-			jpushClient.sendPush(payload);
-		} catch (APIConnectionException e) {
-			e.printStackTrace();
-		} catch (APIRequestException e) {
-			e.printStackTrace();
-		}
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
 	}
 	
+	/**
+	 * 在华为推送中跳转到指定的Activity  
+	 * @param masterSecret 
+	 * @param appKey
+	 * @param title
+	 * @param alert
+	 */
+	public static void sendPush9(String masterSecret,String appKey,String title,String alert) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+	
+        //指定点击华为推送打开的Activity
+      	final String activityUri="com.example.jiguang.jpusttest.HuaweiActivity";
+      	
+        //构建一个推送
+		PushPayload payload =PushPayload.newBuilder()
+				.setPlatform(Platform.android())
+				.setAudience(Audience.all())//指定全体客户端
+				.setNotification(Notification.newBuilder()
+						.setAlert(alert)
+		                .addPlatformNotification(
+		                		AndroidNotification.newBuilder()
+		                        .setTitle(title)
+		                        .setUriActivity(activityUri)
+		                        .build())
+		                .build())
+				
+				.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * 在FCM推送中跳转到指定的Activity  
+	 * @param masterSecret 
+	 * @param appKey
+	 * @param title
+	 * @param alert
+	 */
+	public static void sendPush10(String masterSecret,String appKey,String title,String alert) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+	
+       //指定点击FCM通知时打开的Activity
+       final String uriAction="com.example.jiguang.jpusttest.FCMActivity";
+      		
+        //构建一个推送
+		PushPayload payload =PushPayload.newBuilder()
+				.setPlatform(Platform.android())
+				.setAudience(Audience.all())//指定全体客户端
+				.setNotification(Notification
+						.newBuilder()
+						.setAlert(alert)
+		                .addPlatformNotification(
+		                		AndroidNotification.newBuilder()
+		                        .setTitle(title)
+		                        .setUriAction(uriAction)
+		                        .build())
+		                .build())
+				
+				.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * 使用JSON
+	 * @param masterSecret 
+	 * @param appKey
+	 */
+	public static void sendPush11(String masterSecret,String appKey) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+	
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(PlatformNotification.class, new InterfaceAdapter<PlatformNotification>())
+                .create();
+		
+		//根据JSON构建
+        String payloadString="";///无法构建正确的JSON
+        
+        PushPayload payload = gson.fromJson(payloadString, PushPayload.class);
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+
 	/**
 	 * 设置time_to_live
+	 * @param masterSecret
+	 * @param appKey
+	 * @param timeToLive 推送有效期，以秒为单位·
 	 */
-	public static void sendPush0(
-			final String masterSecret,
-			final String appKey,
-			final String title,//通知标题
-			final String alert//通知内容
-			) {
+	public static void sendPush12(final String masterSecret,final String appKey,final int timeToLive) {
 		
 		ClientConfig config = ClientConfig.getInstance();
 	    config.setPushHostName("https://api.jpush.cn");
@@ -621,24 +648,220 @@ public class PushTest {
 		PushPayload payload=PushPayload.newBuilder()
 				.setPlatform(Platform.all())
 				.setAudience(Audience.all())
-				.setNotification(Notification.newBuilder()//新建推送通知
-                    .setAlert(alert)
-                    .addPlatformNotification(
-                    		AndroidNotification.newBuilder()
-                            .setTitle(title)
-                            .build())
+				.setNotification(Notification.newBuilder()
+                    .setAlert("set time_to_live")
                     .build())
 				.setOptions(Options.newBuilder()
-						.setTimeToLive(120)//设置离线消息时间
+						.setTimeToLive(timeToLive)
 						.build())
 				.build();
 		
 		try {
-			jpushClient.sendPush(payload);
+			//将推送发送出去
+            PushResult result=jpushClient.sendPush(payload);
+			jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
 		} catch (APIConnectionException e) {
 			e.printStackTrace();
 		} catch (APIRequestException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 使用Cid
+	 * @param masterSecret
+	 * @param appKey
+	 */
+	public static void sendPush13(String masterSecret,String appKey) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+        
+        try {
+        	//获取CID列表
+            CIDResult cidResult=jpushClient.getCidList(
+        					10, //Cid数量
+        					"push"//类型
+        			);
+    	
+            //构建一个推送
+    		PushPayload payload =PushPayload.newBuilder()
+    				.setPlatform(Platform.all())//指定所有平台，包括Android和iOS
+    				.setAudience(Audience.all())//指定全体客户端
+    				.setNotification(Notification.alert("use cid"))
+    				.setCid(cidResult.cidlist.get(0))
+    				.build();
+    		
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * 用户分群推送
+	 * @param masterSecret
+	 * @param appKey
+	 * @param gourpIds 用户分群ID，可以在极光控制中取得
+	 */
+	public static void sendPush14(String masterSecret,String appKey,String... groupIds) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+	
+        //构建一个推送
+		PushPayload payload =PushPayload.newBuilder()
+				.setPlatform(Platform.all())//指定所有平台，包括Android和iOS
+				.setAudience(Audience.segment(groupIds))
+				.setNotification(Notification.alert("by group push"))
+				.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * 短信补充
+	 * @param masterSecret
+	 * @param appKey
+	 */
+	public static void sendPush15(String masterSecret,String appKey) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+        
+        //构建短信
+		SMS sms=SMS.newBuilder()
+				.setTempID(152316)//短信模板id
+				.setDelayTime(3)
+				//.addPara(key, value)//添加变量，有的短信中需要用到变量
+				.build();
+	
+        //构建一个推送
+		PushPayload payload =PushPayload.newBuilder()
+				.setPlatform(Platform.all())//指定所有平台，包括Android和iOS
+				.setAudience(Audience.all())//指定全体客户端
+				.setNotification(Notification.alert("短信补充"))
+				.setSMS(sms)
+				.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+	
+
+	/**
+	 * 设置APNs环境
+	 * @param masterSecret
+	 * @param appKey
+	 * @param alert 通知内容
+	 */
+	public static void sendPush16(String masterSecret,String appKey,String alert) {
+		
+		ClientConfig config = ClientConfig.getInstance();
+        config.setPushHostName("https://api.jpush.cn");
+        
+        JPushClient jpushClient = new JPushClient(
+				masterSecret,
+				appKey,
+				null, 
+				config
+		);
+	
+        //构建一个推送
+		PushPayload payload =PushPayload.newBuilder()
+				.setPlatform(Platform.all())
+				.setAudience(Audience.all())
+				.setNotification(Notification.alert(alert))
+				
+				.setOptions(Options.newBuilder()
+						.setApnsProduction(false)//false:测试环境；true：开发环境
+						.build())
+				
+				.build();
+  
+        try {
+        	//将推送发送出去
+            PushResult result = jpushClient.sendPush(payload);
+            jpushClient.close();
+            
+            System.out.println("返回结果：");
+            System.out.println("Message ID："+result.msg_id);
+            System.out.println("返回码："+result.getResponseCode());
+            System.out.println("状态码："+result.statusCode);
+            System.out.println("原始内容："+result.getOriginalContent());
+            
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+	}
+	
 }

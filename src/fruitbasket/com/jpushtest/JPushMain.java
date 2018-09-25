@@ -31,11 +31,23 @@ public class JPushMain {
 		
 		//System.out.println(System.currentTimeMillis());
 		
-		//PushTest.sendPushToAll(JPushCondition.MASTER_SECRET,JPushCondition.APP_KEY,ALERT+" "+getTime());
-		//PushTest.groupPush(JPushCondition.GROUP_MASTER_SECRET,JPushCondition.GROUP_APP_KEY,"Group Push "+getTime());
-		//PushTest.sendToAlias(JPushCondition.MASTER_SECRET,JPushCondition.APP_KEY,PushTest.ALERT,JPushCondition.ALIAS_1);
-		//PushTest.sendPush0(JPushCondition.MASTER_SECRET,JPushCondition.APP_KEY,"title","alert");
-		
+		//PushTest.sendPush0(Condition.MASTER_SECRET,Condition.APP_KEY,ALERT+" "+getTime());
+		//PushTest.sendPush1(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.REGISTRATION_ID_1);
+		//PushTest.sendPush2(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.ALIAS_1);
+		//PushTest.sendPush3(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.TAG_1);
+		//PushTest.sendPush4(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.ALIAS_1,Condition.ALIAS_2,Condition.TAG_1);
+		//PushTest.sendPush5(Condition.MASTER_SECRET,Condition.APP_KEY,"标题","内容");
+		//PushTest.sendPush6(Condition.MASTER_SECRET,Condition.APP_KEY,"标题","内容");
+		//PushTest.sendPush7(Condition.MASTER_SECRET,Condition.APP_KEY,"自定义消息内容");
+		//PushTest.sendPush8(Condition.MASTER_SECRET,Condition.APP_KEY,"通知内容","自定义消息内容");
+		//PushTest.sendPush9(Condition.MASTER_SECRET,Condition.APP_KEY,"标题","内容");
+		//PushTest.sendPush10(Condition.MASTER_SECRET,Condition.APP_KEY,"标题","内容");
+		//PushTest.sendPush11(Condition.MASTER_SECRET,Condition.APP_KEY);
+		//PushTest.sendPush12(Condition.MASTER_SECRET,Condition.APP_KEY,300);
+		//PushTest.sendPush13(Condition.MASTER_SECRET,Condition.APP_KEY);
+		//PushTest.sendPush14(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.GROUP_1_ID);
+		//PushTest.sendPush15(Condition.MASTER_SECRET,Condition.APP_KEY);
+		//PushTest.sendPush16(Condition.MASTER_SECRET,Condition.APP_KEY,"设置APNs环境");
 		
 		//ReportsTest.getReportReceiveds(Condition.MASTER_SECRET,Condition.APP_KEY,String.valueOf(Condition.MSG_ID));
 		//ReportsTest.getMessageStatus(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.MSG_ID,Condition.REGISTRATION_ID_1,Condition.REGISTRATION_ID_2);
