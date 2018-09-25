@@ -25,26 +25,6 @@ import fruitbasket.com.jpushtest.Condition;
  */
 public class ScheduleTest {
 	private static final ScheduleTest instance=new ScheduleTest();
-	
-    protected static final Logger LOG = LoggerFactory.getLogger(ScheduleTest.class);
-    
-    private static JPushClient jpushClient =
-			new JPushClient(Condition.MASTER_SECRET, Condition.APP_KEY);
-
-    /*
-     * 定期任务开始时间
-     */
-    private static final String startTime="2018-07-17 12:00:00";
-    
-    /*
-     * 定期任务结束时间
-     */
-    private static final String endTime="2018-12-30 12:00:00";
-    
-    /*
-     * 任务执行时刻
-     */
-    private static final String executeTime="14:00:00";
     
 	private ScheduleTest() {}
     
@@ -56,7 +36,12 @@ public class ScheduleTest {
      * 创建定时任务
      */
     public static void createSingleSchedule() {
-        
+    	
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
+    	
         final String name = "single_schedule";//任务名称
         final String time = "2018-07-18 11:30:00";//任务执行时刻
         
@@ -76,14 +61,11 @@ public class ScheduleTest {
         			push
         	);
             
-            LOG.info("结果：" + result);
+            System.out.println("结果：" + result);
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+            e.printStackTrace();
         }
     }
 
@@ -91,6 +73,11 @@ public class ScheduleTest {
      * 创建日常定期任务
      */
     public static void createDailySchedule() {
+    	
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
         
     	final String name = "test_daily_schedule";//任务名字
     	final String start = "2018-07-17 12:00:00";//任务开始时间
@@ -111,14 +98,11 @@ public class ScheduleTest {
             		push
             );
             
-            LOG.info("结果：" + result);
+            System.out.println("结果：" + result);
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+            e.printStackTrace();
         }
     }
 
@@ -127,6 +111,11 @@ public class ScheduleTest {
      */
     public static void createWeeklySchedule() {
 
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
+    	
         String name = "test_weekly_schedule";//任务名字
         String start = "2018-07-17 12:00:00";//任务开始时间
         String end = "2018-12-30 12:00:00";//任务结束时间
@@ -152,14 +141,11 @@ public class ScheduleTest {
             				days, 
             				push
             );
-            LOG.info("结果：" + result);
+            System.out.println("结果：" + result);
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+            e.printStackTrace();
         }
     }
 
@@ -168,6 +154,11 @@ public class ScheduleTest {
      */
     public static void createMonthlySchedule() {
 
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
+    	
         String name = "test_monthly_schedule";//任务名字
         String start = "2018-07-17 12:00:00";//任务开始时间
         String end = "2018-12-30 12:00:00";//任务结束时间
@@ -191,14 +182,11 @@ public class ScheduleTest {
             		points, 
             		push
            );
-            LOG.info("schedule result is " + result);
+           System.out.println("schedule result is " + result);
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later.", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+            e.printStackTrace();
         }
     }
     
@@ -206,24 +194,27 @@ public class ScheduleTest {
      * 获取有效的 schedule 列表
      */
     public static void getScheduleList() {
+    	
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
+    	
         final int page = 1;//请求页码，每个页面最多包含50个Schedule
 
         try {
             ScheduleListResult list = jpushClient.getScheduleList(page);
             
-            LOG.info("Schedule总数= " + list.getTotal_count());
+            System.out.println("Schedule总数= " + list.getTotal_count());
             int i=0;
             for(ScheduleResult s : list.getSchedules()) {
-                LOG.info((++i)+": "+s.toString());
+            	System.out.println((++i)+": "+s.toString());
             }
             
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+            e.printStackTrace();
         }
     }
     
@@ -231,20 +222,22 @@ public class ScheduleTest {
      * 获取指定的Schedule
      */
     public static void getSchedule() {
+    	
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
 
         try {
             ScheduleResult result = jpushClient.getSchedule(
             		Condition.SCHEDULE_ID_1
             );
             
-            LOG.info("结果：" + result);
+            System.out.println("结果：" + result);
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+            e.printStackTrace();
         }
     }
     
@@ -252,6 +245,11 @@ public class ScheduleTest {
      * 修改指定的Schedule
      */
     public static void updateSchedule() {
+    	
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
         
     	final String name="test_update_schedule";//定期任务名字
         String[] points = {//任务执行的日期
@@ -292,14 +290,11 @@ public class ScheduleTest {
             		payload
             );
         	
-        	LOG.info("结果：" + result);
+        	System.out.println("结果：" + result);
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+            e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+           e.printStackTrace();
         }
     }
 
@@ -307,18 +302,21 @@ public class ScheduleTest {
      * 删除Schedule
      */
     public static void deleteSchedule() {
+    	
+    	JPushClient jpushClient =new JPushClient(
+        		Condition.MASTER_SECRET,
+        		Condition.APP_KEY
+        );
+    	
         try {
             jpushClient.deleteSchedule(
             		Condition.SCHEDULE_ID_TEST
             );
         
         } catch (APIConnectionException e) {
-            LOG.error("Connection error. Should retry later. ", e);
+           e.printStackTrace();
         } catch (APIRequestException e) {
-            LOG.error("Error response from JPush server. Should review and fix it. ", e);
-            LOG.info("HTTP Status: " + e.getStatus());
-            LOG.info("Error Code: " + e.getErrorCode());
-            LOG.info("Error Message: " + e.getErrorMessage());
+           e.printStackTrace();
         }
     }
 }

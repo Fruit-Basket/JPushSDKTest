@@ -25,13 +25,8 @@ import fruitbasket.com.jpushtest.Condition;
  *
  */
 public class DeviceTest {
-	
-	protected static final Logger LOG = LoggerFactory.getLogger(DeviceTest.class);
 
 	private static final DeviceTest instance=new DeviceTest();
-	
-	private static JPushClient jpushClient =
-			new JPushClient(Condition.MASTER_SECRET, Condition.APP_KEY);
 	
 	private static final String registrationId=Condition.REGISTRATION_ID_3;
     
@@ -106,9 +101,16 @@ public class DeviceTest {
 	}
 	
 	/**
-	 * 清除指定RegistrationID的所有Alias和Tag
+	 * 清除指定RegistrationId的所有Alias和Tag
 	 */
-	public static void clearDeviceTagAlias() {
+	public static void clearDeviceTagAlias(
+			final String masterSecret,
+			final String appKey,
+			final String RegistrationId) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
+		
 		try {
 			DefaultResult result =  jpushClient.updateDeviceTagAlias(
 					registrationId,
@@ -132,6 +134,7 @@ public class DeviceTest {
 			final String masterSecret,
 			final String appKey,
 			final String alias) {
+		
 		JPushClient jpushClient =
 				new JPushClient(masterSecret,appKey);
 		try {
@@ -166,27 +169,37 @@ public class DeviceTest {
 	/**
 	 * 删除别名，以及该别名与设备的对应关系
 	 */
-	public static void deleteAlias() {
+	public static void deleteAlias(
+			final String masterSecret,
+			final String appKey,
+			final String alias) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
+		
 		try {
 			DefaultResult result=jpushClient.deleteAlias(
-					Condition.ALIAS_1,
+					alias,
 					null
 		    );
-			LOG.info("Got result " + result);
+			System.out.println("Got result " + result);
 		} catch (APIConnectionException e) {
-			LOG.error("Connection error. Should retry later. ", e);
+			e.printStackTrace();
 		} catch (APIRequestException e) {
-			LOG.error("Error response from JPush server. Should review and fix it. ", e);
-			LOG.info("HTTP Status: " + e.getStatus());
-			LOG.info("Error Code: " + e.getErrorCode());
-			LOG.info("Error Message: " + e.getErrorMessage());
+			e.printStackTrace();
 		}
 	}
 	
 	/**
 	 * 获JPush服务器中存放的在这个应用下的所有标签
 	 */
-	public static void getTagList() {
+	public static void getTagList(
+			final String masterSecret,
+			final String appKey) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
+		
 		try {
 			TagListResult result=jpushClient.getTagList();
 			
@@ -194,35 +207,37 @@ public class DeviceTest {
 			for(String tag:result.tags) {
 				stringBuilder.append(tag+"、");
 			}
-			LOG.info(stringBuilder.toString());
+			System.out.println(stringBuilder.toString());
 			
 		} catch (APIConnectionException e) {
-			LOG.error("Connection error. Should retry later. ", e);
+			e.printStackTrace();
 		} catch (APIRequestException e) {
-			LOG.error("Error response from JPush server. Should review and fix it. ", e);
-			LOG.info("HTTP Status: " + e.getStatus());
-			LOG.info("Error Code: " + e.getErrorCode());
-			LOG.info("Error Message: " + e.getErrorMessage());
+			e.printStackTrace();
 		}
 	}
 	
 	/**
 	 * 查询特定设备是否有特定标签
 	 */
-	public static void isDeviceInTag() {
+	public static void isDeviceInTag(
+			final String masterSecret,
+			final String appKey,
+		    final String tag,
+		    final String registrationId) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
 		
 		try {
 			BooleanResult result=jpushClient.isDeviceInTag(
-					Condition.TAG_1,
+					tag,
 					registrationId
 			);
 			
-			LOG.info(registrationId+"是否有"+Condition.TAG_1+": "+result.result);
+			System.out.println(registrationId+"是否有"+Condition.TAG_1+": "+result.result);
 		} catch (APIConnectionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (APIRequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -230,30 +245,40 @@ public class DeviceTest {
 	/**
 	 * 更新标签对应的设备
 	 */
-	public static void addRemoveDevicesFromTag() {
+	public static void addRemoveDevicesFromTag(
+			final String masterSecret,
+			final String appKey,
+			final String tag,
+			final String[] addRegistrationIds,
+			final String[] removeRegistrationIds) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
 		
 		Set<String> addSet=new HashSet<>();
+		for(String registrationId:addRegistrationIds) {
+			addSet.add(registrationId);
+		}
 		
 		Set<String> removeSet=new HashSet<>();
-		removeSet.add(Condition.REGISTRATION_ID_1);
-		removeSet.add(Condition.REGISTRATION_ID_2);
-		removeSet.add(Condition.REGISTRATION_ID_3);
+		for(String registrationId:removeRegistrationIds) {
+			removeSet.add(registrationId);
+		}
 		
 		try {
 			
 			DefaultResult result=jpushClient.addRemoveDevicesFromTag(
-					Condition.TAG_1,
+					tag,
 					addSet,
 					removeSet
 			);
 			if(result.isResultOK()==true) {
-				LOG.info("OK");
+				System.out.println("OK");
 			}
 			else {
-				LOG.info("失败");
+				System.out.println("失败");
 			}
 		} catch (APIConnectionException | APIRequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -261,7 +286,11 @@ public class DeviceTest {
 	/**
 	 * 删除标签，以及与设备的绑定关系
 	 */
-	public static void deleteTag() {
+	public static void deleteTag(final String masterSecret,final String appKey) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
+		
 		try {
 			
 			DefaultResult result=jpushClient.deleteTag(
@@ -270,17 +299,15 @@ public class DeviceTest {
 			);
 			
 			if(result.isResultOK()==true) {
-				LOG.info("OK");
+				System.out.println("OK");
 			}
 			else {
-				LOG.info("失败");
+				System.out.println("失败");
 			}
 			
 		} catch (APIConnectionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (APIRequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -292,47 +319,50 @@ public class DeviceTest {
 	 * 字段online：10min内是否在线
 	 * 字段last_online_time：当online==false时，表示两天内最后在线时间；如果两天内不在线则为false
 	 */
-	public static void getUserOnlineStatus() {
+	public static void getUserOnlineStatus(final String masterSecret,final String appKey,final String... registrationIds) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
+		
 		try {
 			Map<String, OnlineStatus> result =  jpushClient.getUserOnlineStatus(
-					Condition.REGISTRATION_ID_1,
-					Condition.REGISTRATION_ID_2,
-					Condition.REGISTRATION_ID_3
+					registrationIds
 			);
 
-			LOG.info(Condition.REGISTRATION_ID_1+": "+result.get(Condition.REGISTRATION_ID_1).toString());
-			LOG.info(Condition.REGISTRATION_ID_2+": "+result.get(Condition.REGISTRATION_ID_2).toString());
-			LOG.info(Condition.REGISTRATION_ID_3+": "+result.get(Condition.REGISTRATION_ID_3).toString());
+			for(String registration:registrationIds) {
+				System.out.println(registrationId+": "+result.get(registrationIds).toString());
+			}
 			
 		} catch (APIConnectionException e) {
-			LOG.error("Connection error. Should retry later. ", e);
+			e.printStackTrace();
 		} catch (APIRequestException e) {
-			LOG.error("Error response from JPush server. Should review and fix it. ", e);
-			LOG.info("HTTP Status: " + e.getStatus());
-			LOG.info("Error Code: " + e.getErrorCode());
-			LOG.info("Error Message: " + e.getErrorMessage());
+			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * 把registrationId绑定手机号
 	 */
-	public static void bindMobile() {
+	public static void bindMobile(
+			final String masterSecret,
+			final String appKey,
+			final String registrationId,
+			final String mobileNumber) {
+		
+		JPushClient jpushClient =
+				new JPushClient(masterSecret,appKey);
 		try {
 			DefaultResult result =  jpushClient.bindMobile(
-					Condition.TAG_1,
-					"13728860097"
-					///如何取消绑定手机号码？
-					//传入null和""都没有作用
+					registrationId,
+					mobileNumber
 			);
-			LOG.info("返回结果：" + result);
+			///如何取消绑定手机号码？
+			//传入null和""都没有作用
+			System.out.println("返回结果：" + result);
 		} catch (APIConnectionException e) {
-			LOG.error("Connection error. Should retry later. ", e);
+			e.printStackTrace();
 		} catch (APIRequestException e) {
-			LOG.error("Error response from JPush server. Should review and fix it. ", e);
-			LOG.info("HTTP Status: " + e.getStatus());
-			LOG.info("Error Code: " + e.getErrorCode());
-			LOG.info("Error Message: " + e.getErrorMessage());
+			e.printStackTrace();
 		}
 	}
 	

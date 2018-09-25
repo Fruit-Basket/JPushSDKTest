@@ -49,30 +49,7 @@ public class JPushMain {
 		//PushTest.sendPush15(Condition.MASTER_SECRET,Condition.APP_KEY);
 		//PushTest.sendPush16(Condition.MASTER_SECRET,Condition.APP_KEY,"…Ë÷√APNsª∑æ≥");
 		
-		//ReportsTest.getReportReceiveds(Condition.MASTER_SECRET,Condition.APP_KEY,String.valueOf(Condition.MSG_ID));
-		//ReportsTest.getMessageStatus(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.MSG_ID,Condition.REGISTRATION_ID_1,Condition.REGISTRATION_ID_2);
-		//ReportsTest.testGetMessages();
-		//ReportsTest.testGetUsers();
 		
-		//DeviceTest.getDeviceTagAlias(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.REGISTRATION_ID_1);
-		//DeviceTest.updateDeviceTagAlias();
-		//DeviceTest.testClear();
-		//DeviceTest.getAliasDeviceList(Condition.MASTER_SECRET,Condition.APP_KEY,Condition.ALIAS_1);
-		//DeviceTest.deleteAlias();
-		//DeviceTest.getTags(); 
-		//DeviceTest.isDeviceInTag();
-		//DeviceTest.addRemoveDevicesFromTag();
-		//DeviceTest.deleteTag();
-		//DeviceTest.getUserOnlineStatus();
-		//DeviceTest.bindMobile();
-		
-		//ScheduleTest.createSingleSchedule();
-		//ScheduleTest.createDailySchedule();
-		//ScheduleTest.createWeeklySchedule();
-		//ScheduleTest.createMonthlySchedule();
-		//ScheduleTest.getScheduleList();
-		//ScheduleTest.getSchedule();
-		//ScheduleTest.updateSchedule();
 		
 		//ClientTest.testDefaultClient();
 		//ClientTest.testCustomClient();
